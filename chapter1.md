@@ -86,12 +86,15 @@ The following apache virtual hosts are defined
 </VirtualHost>
 ````
 
+<br/><br/><br/><br/><br/><br/><br/>
+
 ###1.1.2 Install Composer
 
 Composer is a dependency management tool for PHP applications. To install Composer, simply run:
 
 ````bsh
-$ curl -sS https://getcomposer.org/installer|sudo php -- --install-dir=/bin --filename=composer
+$ curl -sS https://getcomposer.org/installer|sudo php -- --install-dir=/bin \
+ --filename=composer
 #!/usr/bin/env php
 All settings correct for using Composer
 Downloading...
@@ -108,6 +111,10 @@ Composer version 1.0-dev
 ````
 For more details about other installation alternatives, check Composer's [online documenation](https://getcomposer.org/doc/00-intro.md).
 
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
 ###1.1.3 Create a new Symfony application
 
 ````bash
@@ -121,83 +128,10 @@ Created project in symfony-tutorial
 Loading composer repositories with package information
 Installing dependencies (including require-dev) from lock file
   - Installing doctrine/lexer (v1.0.1)
-    Loading from cache
-
-  - Installing doctrine/annotations (v1.2.4)
-    Downloading: 100%
-
-  - Installing twig/twig (v1.18.1)
-    Loading from cache
-
-  - Installing psr/log (1.0.0)
-    Loading from cache
-
-  - Installing doctrine/inflector (v1.0.1)
-    Loading from cache
-
-  - Installing doctrine/collections (v1.3.0)
-    Loading from cache
-
-  - Installing doctrine/cache (v1.4.1)
-    Loading from cache
-
-  - Installing doctrine/common (v2.5.0)
-    Loading from cache
-
-  - Installing symfony/symfony (v2.6.7)
-    Downloading: 100%
-
-  - Installing jdorn/sql-formatter (v1.2.17)
-    Loading from cache
-
-  - Installing doctrine/doctrine-cache-bundle (v1.0.1)
-    Loading from cache
-
-  - Installing doctrine/dbal (v2.4.4)
-    Loading from cache
-
-  - Installing doctrine/doctrine-bundle (v1.4.0)
-    Downloading: 100%
-
-  - Installing doctrine/orm (v2.4.7)
-    Loading from cache
-
-  - Installing incenteev/composer-parameter-handler (v2.1.0)
-    Downloading: 100%
-
-  - Installing sensiolabs/security-checker (v2.0.2)
-    Downloading: 100%
-
-  - Installing sensio/distribution-bundle (v3.0.22)
-    Downloading: 100%
-
-  - Installing sensio/framework-extra-bundle (v3.0.7)
-    Downloading: 100%
-
-  - Installing kriswallsmith/assetic (v1.2.1)
-    Loading from cache
-
-  - Installing symfony/assetic-bundle (v2.6.1)
-    Loading from cache
-
-  - Installing monolog/monolog (1.13.1)
-    Downloading: 100%
-
-  - Installing symfony/monolog-bundle (v2.7.1)
-    Loading from cache
-
-  - Installing swiftmailer/swiftmailer (v5.4.0)
-    Downloading: 100%
-
-  - Installing symfony/swiftmailer-bundle (v2.3.8)
-    Loading from cache
-
-  - Installing twig/extensions (v1.2.0)
-    Loading from cache
-
-  - Installing sensio/generator-bundle (v2.5.3)
-    Loading from cache
-
+  .
+  .. All the required packages
+  ...
+  .....
 Generating autoload files
 Would you like to install Acme demo bundle? [y/N] N
 > Incenteev\ParameterHandler\ScriptHandler::buildParameters
@@ -228,6 +162,7 @@ The assets were installed using symbolic links.
 > Sensio\Bundle\DistributionBundle\Composer\ScriptHandler::removeSymfonyStandardFiles
 > Sensio\Bundle\DistributionBundle\Composer\ScriptHandler::prepareDeploymentTarget
 ````
+<br/><br/><br/><br/><br/><br/><br/>
 
 Composer generated the directory structure of your Symfony application.
 
@@ -239,6 +174,9 @@ Composer generated the directory structure of your Symfony application.
 - **web** is the web directory that your web server should use as DocumentRoot
 
 To check if the application is created correctly, visit http://symfony.local you should get a 404 not found HTTP error. We will come back to this later.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 ##1.2 Git
 
@@ -454,6 +392,7 @@ pick bd0a116 Updated Symfony version to 2.7.*
 #
 # Note that empty commits are commented out
 ````
+<br/>
 
 Change `pick bd0a116 Updated Symfony version to 2.7.*` to `s bd0a116 Updated Symfony version to 2.7.*`  
 Save the file and exit, Git will open your text editor again with
@@ -506,17 +445,26 @@ Date:   Sun Aug 23 00:53:09 2015 +0300
 Looks better, to see exactly what happened in a given commit, use `git show f32f00b2691285fe93946e0c30c53fab47edf012`  
 You will see the changes made to **composer.json** and **composer.lock**
 
-We are in section (2 Git) from this book, let's create a branch for each section, so we will start with **2**
+We are in section (1.2 Git) from this book, let's create a branch for each section, so we will start with **1.2**
 
 ````bash
-$ git checkout -b 2
-Switched to a new branch '2'
+$ git checkout -b 1.2
+Switched to a new branch '1.2'
 ````
+
+>You can find all the source code of this book on github https://github.com/symfony-tutorial/tutorial and every section is in a branch with the section number. To get the code at this point, you need to checkout the branch 1.2
+
+To get the code for the next section
+
+````bash
+git clone git@github.com:symfony-tutorial/tutorial.git --branch 1.3
+````
+
+Or, if you already cloned the repository, `git checkout 1.3`. To see all the branches, `git branch -r`.
 
 So far, we worked only on a local repository. To share code between developers, they must synchronize their work with a shared repository. There are free platforms like Github and Gitlab, you can also install git server within your private infrastructure.
 
-I am using Github and the example URLs will point to my github repository. No matter which platform you use, the commands are the same. On my profile, I create a new repository and call it **my-symfony-tutorial
-**
+I am using Github and the example URLs will point to my github repository. No matter which platform you use, the commands are the same. On my profile, I create a new repository and name it **my-symfony-tutorial**
 
 ````bash
 $ git remote add origin git@github.com:skafandri/my-symfony-tutorial.git
@@ -525,14 +473,15 @@ $ git remote add origin git@github.com:skafandri/my-symfony-tutorial.git
 We just created a new remote that we called **origin**. Now we can **push** our changes to the remote repository.
 
 ````bash
-$ git push origin 2
+$ git push origin 1.2
 Counting objects: 57, done.
 Compressing objects: 100% (51/51), done.
 Writing objects: 100% (57/57), 45.97 KiB | 0 bytes/s, done.
 Total 57 (delta 3), reused 0 (delta 0)
 To git@github.com:skafandri/my-symfony-tutorial.git
- * [new branch]      2 -> 2
+ * [new branch]      1.2 -> 1.2
 ````
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 ##1.3 Configuration
 
@@ -590,67 +539,61 @@ We update **app/config/routing.yml**, we change `@AppBundle/Controller/` to `@Ap
 
 Visit http://symfony.local/app/example to make sure everything works as before and we didn't break anything. We should not in fact, we just changed the configuration format, the values are the same.
 
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
 ##1.4 Tracer Bullet Development
 
 The idea behind TBD is very simple, implement just enough code to have something visible (not necessarly graphically). One of the greatest advantages of TBD is that it forces you not to couple your code with third party vendors like libraries, SAAS, APIs.. Pushing those conserns as far as possible in the development process will help you implement a more independent application. It will be easier for you in the future to switch from one technology to another (database server, web server, mailing server) since most of your code will be platform agnostic.
 
 I won't dive too much into TBD now. We will just adopt it as we develop our application. Better to see it in action. I recommend the following book *Ship It! A Practical Guide to Successful Software Projects \[ISBN 0-9745140-4-7\]*. The authors dedicated a full chapter to Tracer Bullet Development. The rest of the book is not less valuable, is a helpful guide through good software development practices. With very interesting use cases from real projects.
 
-We will start implementing a simple product catalog for our application. Initially, we will delivery the following features: list categories, edit a category, create a category.
+We will start implementing a simple product catalog for our application. Initially, we will delivery the following features: list categories, edit a category, save a category.
 
-##1.4.1 Routing
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+###1.4.1 Routing
 
 Routing is about telling Symfony which action to invoke depending on the request properties. The mostly used property being the request URL, is not the only one. You can configure routes based on hostname, HTTP method, headers, custom computed conditions...
 
-Let's create the routes for the catalog functionality.
+Let's create the routes for the category functionality.
 
 Edit **app/config/routing.yml** discard the existing content and put
 
 ````
-catalog:
-    prefix: /catalog
-    resource: "@AppBundle/Resources/config/routing/catalog.yml"
+category:
+    prefix: /category
+    resource: "@AppBundle/Resources/config/routing/category.yml"
 ````
 
-`prefix: /catalog` tells the router that every **path** defined in the imported file will be prefixed by **/catalog**. So the real path of `/some_path` will be `/catalog/some_path`.
+`prefix: /category` tells the router that every **path** defined in the imported file will be prefixed by **/category**. So the real path of `/some_path` will be `/category/some_path`.
 
-- Create **src/AppBundle/Resources/config/routing/catalog.yml**
+- Create **src/AppBundle/Resources/config/routing/category.yml**
 
 ````
-catalog_index:
-    path: /
-    defaults: { _controller: AppBundle:Catalog:index}
-catalog_category_list:
-    path: /category/list
-    defaults: { _controller: AppBundle:Catalog:listCategories}
-catalog_category_edit:
-    path: /category/edit/{categoryId}
-    defaults: { _controller: AppBundle:Catalog:editCategory, categoryId:0}
+category_list:
+    path: /list
+    defaults: { _controller: AppBundle:Category:listCategories}
+category_edit:
+    path: /edit/{categoryId}
+    defaults: { _controller: AppBundle:Category:editCategory, categoryId:0}
     methods:  [GET]
-catalog_category_save:
-    path: /category/edit/{categoryId}
-    defaults: { _controller: AppBundle:Catalog:saveCategory, categoryId:0}
+category_save:
+    path: /edit/{categoryId}
+    defaults: { _controller: AppBundle:Category:saveCategory, categoryId:0}
     methods:  [POST]
 ````
-`{ _controller: AppBundle:Catalog:index}` tells the router component about which controller method to call to return a response when this route is matched. In this case it will be `AppBundle\Controller\CatalogController::indexAction()`
+`{ _controller: AppBundle:Category:listCategories}` tells the router component about which controller method to call to return a response when this route is matched. In this case it will be `AppBundle\Controller\CategoryController::listCategoriesAction()`
 
-##1.4.2 Views
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+###1.4.2 Views
 Symfony has a flexible templating component that supports multiple templating engines. In this course we will use Twig.
 
 >**Symfony best practice:** Use Twig templating format for your templates.
 
 
-- **app/Resources/views/catalog/index.html.twig**
-
-````html
-{% extends 'base.html.twig' %}
-{% block body %}
-    <p>Catalog</p>
-    <a href="{{ path('catalog_category_list') }}">Categories</a>
-{% endblock %}
-````
-
-- **app/Resources/views/catalog/category/list.html.twig**
+- **app/Resources/views/category/list.html.twig**
 
 <br/>
 
@@ -663,10 +606,7 @@ Symfony has a flexible templating component that supports multiple templating en
             <th>#</th><th>Category</th><th colspan="2">Actions</th>
         </tr>
         {% for category in categories %}
-            {% set editUrl = path(
-                'catalog_category_edit',
-                {'categoryId': category.id})
-            %}
+            {% set editUrl = path('category_edit', {'categoryId': category.id})%}
             <tr>
                 <td>{{ category.id }}</td>
                 <td>{{ category.label }}</td>
@@ -674,14 +614,13 @@ Symfony has a flexible templating component that supports multiple templating en
             </tr>
         {% endfor %}
     </table>
-    <a href="{{ path('catalog_index') }}">Back to catalog</a>
 {% endblock %}
 ````
 <br/>
 
-`set editUrl = path('catalog_category_edit',{'categoryId': category.id})` is how you assign a value to a variable in Twig. This time we used the **path** function with a second argument `{'categoryId': category.id}`. This argument will be passed to the Controller that will render that route.
+`set editUrl = path('category_edit',{'categoryId': category.id})` is how you assign a value to a variable in Twig. This time we used the **path** function with a second argument `{'categoryId': category.id}`. This argument will be passed to the Controller that will render that route.
 
-- **app/Resources/views/catalog/category/edit.html.twig**
+- **app/Resources/views/category/edit.html.twig**
 
 <br/>
 
@@ -725,51 +664,42 @@ Symfony has a flexible templating component that supports multiple templating en
         </table>
         <input type="submit" value="save"/>
     </form>
-    <a href="{{ path('catalog_category_list') }}">Back to list</a>
+    <a href="{{ path('category_list') }}">Back to list</a>
 {% endblock %}
 ````
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
-##1.4.3 Controller
+###1.4.3 Controller
 
 Now we need to implement the controller actions we referred in the routes.
 
-- Create **src/AppBundle/Controller/CatalogController.php**
+- Create **src/AppBundle/Controller/CategoryController.php**
 
 ````php
 <?php
-
 namespace AppBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class CatalogController extends Controller
+class CategoryController extends Controller
 {
-
-    public function indexAction()
-    {
-        return $this->render('AppBundle:catalog:index.html.twig');
-    }
-
     public function listCategoriesAction()
     {
         $arguments = array('categories' => $this->getCategories());
-        return $this->render('AppBundle:catalog:list.html.twig', $arguments);
+        return $this->render('AppBundle:category:list.html.twig', $arguments);
     }
-
     public function editCategoryAction($categoryId)
     {
         $arguments = array(
             'category' => $this->getCategory($categoryId),
             'categories' => $this->getCategories()
         );
-        return $this->render('AppBundle:catalog:edit.html.twig', $arguments);
+        return $this->render('AppBundle:category:edit.html.twig', $arguments);
     }
-
     public function saveCategoryAction($categoryId)
     {
-        return $this->redirectToRoute('catalog_category_list');
+        return $this->redirectToRoute('category_list');
     }
-
     private function getCategories()
     {
         return array(
@@ -786,22 +716,104 @@ class CatalogController extends Controller
             ),
         );
     }
-
     private function getCategory($categoryId)
     {
         $categories = $this->getCategories();
         return $categories[$categoryId];
     }
-
 }
 ````
 
 At this point we are done, let's check if everything is working as expected.
 
-- http://symfony.local/catalog/ should show "Catalog" and a link to Categories list page.
+- http://symfony.local/category/list should show the list of 5 categories with edit links.
 
-- http://symfony.local/catalog/category/list should show the list of 5 categories with edit links, and a link to the catalog index.
+- http://symfony.local/category/edit/1 should show a form to edit the label and the parent of the category Phones. After submitting the form, you should get back to the category listing page.
 
-- http://symfony.local/catalog/category/edit/1 should show a form to edit the label and the parent of the category Phones. Upon submit, you should get back to the category listing page.
+>When developing, you usually want to run your application in **dev** mode. All you need is to prefix any URL with **app_dev.php**.  The dev mode is very useful when working on cacheable resources like templates, routes, doctrine meta-data, configurations, parameters.. Because those resources get parsed on every request. When running in prod mode, you need to clear your application's cache whenever you make a change to a cacheable resource. Another good reason to run the application in dev mode when working on it, is the debugging informations available about routes, translations, templates, queries...
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/>
 
 ##1.5 Exercises
+
+<br/><br/>
+
+**1.5.1** Return an HTTP 404 response when CategoryController::editCategoryAction is called with an invalid categoryId.
+
+<br/><br/>
+
+**1.5.2** Add a new route **category_list_json** that  
+- Has the same path as **category_list** route
+- Returns a JSON response
+- Is matched when the request content-type is **application/json**
+
+<br/><br/>
+
+**1.5.3** Create ProductController with the following actions: **listProducts** **editProduct** **saveProduct**. A product will have the following members **id**, **title**, **code** and **decription**.  
+ProductController will have a method `getProducts` that returns a hard-coded array of few products.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**1.5.4** Add a new member to the product structure, name it **categories**. It will contain the categories to which the product belongs. Update the controllers and the product list view to show the new change.
+
+Product item example:
+
+````php
+array(
+  'id' => 1,
+  'title' => 'Padfone2',
+  'code' => 'padfone2',
+  'description' => 'an awesome padfone',
+  'categories' => array(
+    0 => array(
+      'id' => 1,
+      'label' => 'phones',
+      'parent' => null
+    ),
+    1 => array(
+      'id' => 3,
+      'label' => 'tablets',
+      'parent' => null
+    )
+  )
+)
+````
+
+Product list example:
+<table>
+    <tr>
+        <th>#</th>
+        <th>Code</th>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Categories</th>
+        <th>Actions</th>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>padfone2</td>
+        <td>Padfone2</td>
+        <td>an awesome padfone</td>
+        <td>
+            Phones
+            <br/>
+            Tablets
+        </td>
+        <td><a href="#">Edit</a></td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>gforce750xdf15</td>
+        <td>Gforce 750x df-15</td>
+        <td>an awesome graphic card</td>
+        <td>
+            Computers
+        </td>
+        <td><a href="#">Edit</a></td>
+    </tr>
+</table>
+
+To keep consistency between CategoryController and ProductController without introducing code duplication, move the `getCategory` and `getCategories` from the controller to an other class that can be shared between other controllers.
