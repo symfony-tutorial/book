@@ -1,4 +1,4 @@
-# <center>Getting started</center>
+# <center>1. Getting started</center>
 
 
 ##1.1 Create a new application
