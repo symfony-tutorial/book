@@ -14,12 +14,8 @@ We are still adopting the TBD method. That means our first database design is no
 Let's start with the following database structure
 
 ````sql
-<<<<<<< HEAD
 CREATE SCHEMA IF NOT EXISTS `symfony`
 DEFAULT CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci';
-=======
-CREATE SCHEMA IF NOT EXISTS `symfony` DEFAULT CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci';
->>>>>>> dd01917... chapter2
 
 USE `symfony`;
 
@@ -136,6 +132,7 @@ MySQL integer types
     <td>18446744073709551615</td>
   </tr>
 </table>
+
 
 <br/>
 >Recommanded reading: **High Performance MySQL** [ISBN: 978-1449314286] by *Baron Schwartz* (O'Reilly)
