@@ -2,26 +2,9 @@
 
 <br/>
 
-##4.1 Before we start
+##4.1 Symfony best practices for reusable bundles
 
-###4.1.1 TDD
-
-TDD stands for Test Driven Development. The basic idea is very simple: write tests before writing production code.
-
-A complete test-driven development cycle consists on the following sequence
-
-1. Add a test
-2. Run all tests and see if the new one fails
-3. Write some code
-4. Run tests
-5. Refactor code
-6. Repeat
-
-We are not going to study TDD in depth here. There is plenty of material about the subject, you can start by the [wikipedia](https://en.wikipedia.org/wiki/Test-driven_development) page about TDD. The process may seem awkward and counter-intuitive at first. But once you get used to it, you will start seeing the benefits it will bring to your code quality, and to your productivity.
-
-###4.1.2 Symfony best practices for reusable bundles
-
-After our previous experience with Sensio Generator Bundle, you may have noticed that is not the best neither the most flexible code generator ever. In this chapter we will attempt to come with a better alternative to that bundle. The main motivation for developing a vendor bundle is code re-usability. Therefore, one of the most expected aspects is a well decoupled and extensible code.
+Previously, we got in touch with Sensio Generator Bundle. In this chapter we will attempt to come with an enhanced alternative to that bundle. The main motivation for developing a vendor bundle is code re-usability. Therefore, one of the most expected aspects is a well decoupled and extensible code.
 
  Before we start, let's highlight some of the Symfony best practices for reusable bundles.
 
@@ -33,35 +16,33 @@ After our previous experience with Sensio Generator Bundle, you may have noticed
 I developed my own flavor of good practices also, that I would like to share with you
 > - The tests should cover <strike>at least 95%</strike> **100%** of the code base.
 - Avoid dependencies, and when necessary keep them to the minimum, with maximum compatibility.
-- When requesting configurations from the user, set default values whenever you can.
+- When requesting configurations from the user, set default values whenever possible.
 
-##4.2 Generators
+##4.2 Bundle skeleton
 
-###4.2.1 View action generator
+The bundle will be distributed using **composer**. The source code will be versioned using **git**. **PHPUnit** will be used as a unit testing framework.
 
-Many programmers may have experienced the blanc page effect. Is when you are about to start something from scratch and you don't find exactly from where to start. One of my ways to get out of this situation is to start with the most obvious and straight forward tasks. We will assume that our bundle will be distributed by **composer** and maintained using **git**.
-- Create a new directory somewhere in your working directory but not within the application's directory.
+- Create a new directory GeneratorBundle (or whatever you prefer) somewhere in your working directory but not within the application's directory.
 - Create **composer.json**
 
 ````json
 {
     "name": "emag/generator-bundle",
-    "description": "Emag code generator",
+    "description": "Emag GeneratorBundle",
     "type": "symfony-bundle",
     "license": "MIT",
+    "require": {
+        "symfony/symfony": "~2.9|~3"
+    },
     "require-dev": {
-        "symfony/routing": "*",
-        "symfony/dependency-injection": "*",
-        "symfony/http-kernel": "*",
-        "symfony/options-resolver": "*",
-        "twig/twig": "*",
-        "doctrine/common": "*",
-        "doctrine/orm": ">=2.0",
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": ">=4.4"
     },
     "autoload": {
         "psr-4": {
-            "Emag\\GeneratorBundle\\": ""
+            "Emag\\GeneratorBundle\\": "",
+            "exclude-from-classmap": [
+                "/Tests/"
+            ]
         }
     }
 }
@@ -69,26 +50,27 @@ Many programmers may have experienced the blanc page effect. Is when you are abo
 
 Run `composer install`. composer will install the required components under the **vendor** directory.
 
-Knowing which components you may need in advance is nice to have, but is not mandatory. It is normal to add components that you need as you go. With experience you will start making better guesses.
-
-- Create **.gitignore** to exclude the vendor directory and composer.lock that will be created by composer
+- Create **.gitignore**
 
 ````
-vendor
+vendor/
 composer.lock
+phpunit.xml
 ````
-
-One more thing before starting writing code, is to create a configuration file for PHPUnit.
 
 - Create **phpunit.xml.dist**
 
 ````xml
 <?xml version="1.0" encoding="UTF-8"?>
 
-<phpunit bootstrap="./vendor/autoload.php" colors="true">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.1/phpunit.xsd"
+         backupGlobals="false"
+         colors="true"
+         bootstrap="vendor/autoload.php">
     <testsuites>
-        <testsuite name="GeneratorBundle">
-            <directory suffix="Test.php">./Tests</directory>
+        <testsuite name="Emag GeneratorBundle Test Suite">
+            <directory>./Tests/</directory>
         </testsuite>
     </testsuites>
 
@@ -102,15 +84,42 @@ One more thing before starting writing code, is to create a configuration file f
             </exclude>
         </whitelist>
     </filter>
+
     <logging>
         <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
     </logging>
 </phpunit>
 ````
 
-Let's start with the route generation. Suppose we have an entity called **TestEntity** within a bundle called **TestBundle**. The expected route for the **view** action would have a path like */test/testentity/{id}/view* and a controller action like *TestBundle:TestEntity:view*. To write the first test, all we need to do is to write the previous expectation in PHP.
+##4.3 TDD
 
-We will create a **Tests** directory where we will put all the tests.
+###4.3.1 What is TDD?
+
+TDD stands for Test-Driven Development. The basic idea is very simple: write tests before writing production code.
+
+We are not going to study TDD in depth here. There is plenty of material about the subject, you can start by the [wikipedia](https://en.wikipedia.org/wiki/Test-driven_development) page about TDD. The process may seem awkward and counter-intuitive at first. But once you get used to it, you will start seeing the benefits it will bring to your code quality, and to your productivity.
+
+A complete test-driven development cycle consists on the following sequence
+
+1. Add a test
+2. Run all tests and see if the new one fails
+3. Write some code
+4. Run tests
+5. Refactor code
+6. Repeat
+
+In the following section we will go through a set of TDD cycles. In each cycle we will set an expectation in natural language then apply the TDD sequence until the expectation is fulfilled.
+
+###4.3.2 TDD cycles
+
+###4.3.2.1 Generate route for view action
+
+Given an entity called **TestEntity** within a bundle **TestBundle**. The generated route for the **view** action should have:  
+path: **/test/testentity/{id}/view**  
+controller: **TestBundle:TestEntity:view**  
+methods: **[GET]**  
+
+#####Cycle 1.1. Add a test
 
 - Create **Tests/Generator/RouteGeneratorTest.php**
 
@@ -124,48 +133,47 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGenerateViewRoute()
     {
-        $bundle = new \Emag\GeneratorBundle\Tests\Stubs\TestBundle\TestBundle();
-        $metadata = new \Doctrine\ORM\Mapping\ClassMetadata('TestEntity');
+        $bundleMock = $this
+                ->getMockBuilder("Symfony\Component\HttpKernel\Bundle\BundleInterface")
+                ->getMock();
+        $bundleMock
+                ->expects($this->any())
+                ->method('getName')
+                ->will($this->returnValue('TestBundle'));
+
+        $metadataMock = $this
+                ->getMockBuilder("Doctrine\Common\Persistence\Mapping\ClassMetadata")
+                ->getMock();
+        $metadataMock
+                ->expects($this->any())
+                ->method('getName')
+                ->will($this->returnValue('TestEntity'));
 
         $routeGenerator = new \Emag\GeneratorBundle\Generator\RouteGenerator();
 
-        $route = $routeGenerator->getRoute($bundle, $metadata, 'view');
+        $route = $routeGenerator->getRoute($bundleMock, $metadataMock, 'view');
 
         $this->assertEquals('/test/testentity/{id}/view', $route->getPath());
         $this->assertEquals(
                 array('_controller' => 'TestBundle:TestEntity:view'), $route->getDefaults()
         );
-        $this->assertContains('GET', $route->getMethods());
+        $this->assertEquals(array('GET'), $route->getMethods());
     }
+
 }
 ````
 
-The previous test requires a *fake* test bundle in **Tests/Stubs/TestBundle/TestBundle.php**
+#####Cycle 1.2. Run all tests and see if the new one fails
 
-````php
-<?php
+````bash
+$ ./vendor/phpunit/phpunit/phpunit
 
-namespace Emag\GeneratorBundle\Tests\Stubs\TestBundle;
-
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
-
-class TestBundle implements BundleInterface
-{
-
-    public function getName()
-    {
-        return 'TestBundle';
-    }
-
-    //And empty body implementations of methods required by BundleInterface
-}
+PHP Fatal error:  Class 'Emag\GeneratorBundle\Generator\RouteGenerator' not found in  
+ /GeneratorBundle/Tests/Generator/RouteGeneratorTest.php on line 22
 ````
+This is indeed a failing tests. In the future we will omit this kind of tests because of its obviousness.
 
-Running `phpunit` now will show the obvious error  
-`PHP Fatal error:  Class 'Emag\GeneratorBundle\Generator\RouteGenerator' not found`
-
-We will create the **RouteGenerator** that will make the test pass.
-
+#####Cycle 1.3. Write some code
 - Create **Generator/RouteGenerator.php**
 
 ````php
@@ -173,7 +181,7 @@ We will create the **RouteGenerator** that will make the test pass.
 
 namespace Emag\GeneratorBundle\Generator;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\Routing\Route;
 
@@ -181,7 +189,6 @@ class RouteGenerator
 {
 
     /**
-     *
      * @param BundleInterface $bundle
      * @param ClassMetadata $metadata
      * @param string $action
@@ -193,6 +200,7 @@ class RouteGenerator
         switch ($action) {
             case 'view':
                 $route = $this->createViewRoute($bundle, $metadata, $action);
+                break;
         }
         return $route;
     }
@@ -206,8 +214,11 @@ class RouteGenerator
     protected function createViewRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
     {
         $route = new Route($this->getViewPath($bundle, $metadata, $action));
-        $route->setMethods(array('get'));
-        $route->setDefaults(array('_controller' => $this->getControllerAction($bundle, $metadata, $action)));
+        $route
+                ->setMethods(array('get'))
+                ->setDefaults(
+                        array('_controller' => $this->getControllerAction($bundle, $metadata, $action))
+        );
         return $route;
     }
 
@@ -246,13 +257,9 @@ class RouteGenerator
     }
 }
 ````
-
-Let's test our work
+#####Cycle 1.4. Run tests
 ````bash
-$ phpunit
-PHPUnit 4.8.19 by Sebastian Bergmann and contributors.
-
-Time: 666 ms, Memory: 8.50Mb
+$ ./vendor/phpunit/phpunit/phpunit
 
 OK (1 test, 3 assertions)
 
@@ -267,44 +274,52 @@ Code Coverage Report:
   Methods: 100.00% ( 5/ 5)   Lines: 100.00% ( 12/ 12)
 ````
 
-Looks good so far. What if we try to generate a route for an invalid action? We should expect to get an `\InvalidArgumentException`, as we did previously, we will just write this expectation in PHP.
+In the future we will omit this sequence unless there is something interesting about it.
 
-We will edit **Tests/Generator/RouteGeneratorTest.php** and add the following test:
+###4.3.2.2 Throw an exception when given an invalid action
+
+#####Cycle 2.1. Add a test
+Add the following test to **Tests/Generator/RouteGeneratorTest.php**
+
 ````php
-<?
 /**
- * @expectedException InvalidArgumentException
- * @expectedExceptionMessage invalid action "invalidAction"
+ * @expectedException \InvalidArgumentException
+ * @expectedExceptionMessage Invalid action invalid_action
  */
-public function testGenerateInvalidActionRoute()
+public function testGenerateInvalidAction()
 {
-    $bundle = new \Emag\GeneratorBundle\Tests\Stubs\TestBundle\TestBundle();
-    $metadata = new \Doctrine\ORM\Mapping\ClassMetadata('Entity');
+    $bundleMock = $this
+            ->getMockBuilder("Symfony\Component\HttpKernel\Bundle\BundleInterface")
+            ->getMock();
+
+    $metadataMock = $this
+            ->getMockBuilder("Doctrine\Common\Persistence\Mapping\ClassMetadata")
+            ->getMock();
+
     $routeGenerator = new \Emag\GeneratorBundle\Generator\RouteGenerator();
 
-    $routeGenerator->getRoute($bundle, $metadata, 'invalidAction');
+    $routeGenerator->getRoute($bundleMock, $metadataMock, 'invalid_action');
 }
 ````
+#####Cycle 2.2. Run all tests and see if the new one fails
 
-If you run the test suite again, it will fail.
 ````bash
+$ ./vendor/phpunit/phpunit/phpunit
 There was 1 failure:
 
-1) Emag\GeneratorBundle\Tests\Generator\RouteGeneratorTest::testGenerateInvalidActionRoute
-Failed asserting that exception of type "InvalidArgumentException" is thrown.
+1) Emag\GeneratorBundle\Tests\Generator\RouteGeneratorTest::testGenerateInvalidAction
+Failed asserting that exception of type "\InvalidArgumentException" is thrown
 ````
+#####Cycle 2.3. Write some code
 
-Next, we update **getRoute** method to throw an exception when given an invalid action.
-- Edit **Generator/RouteGenerator.php** and update getRoute method
+Update `Emag\GeneratorBundle\Generator\RouteGenerator::getRoute` as following
 
 ````php
-<?
 /**
- *
  * @param BundleInterface $bundle
  * @param ClassMetadata $metadata
  * @param string $action
- * @return string
+ * @return Route
  * @throws \InvalidArgumentException
  */
 public function getRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
@@ -315,19 +330,462 @@ public function getRoute(BundleInterface $bundle, ClassMetadata $metadata, $acti
             $route = $this->createViewRoute($bundle, $metadata, $action);
             break;
         default:
-            throw new \InvalidArgumentException(sprintf('invalid action "%s"', $action));
+            throw new \InvalidArgumentException(sprintf("Invalid action %s", $action));
     }
     return $route;
 }
 ````
+#####Cycle 2.4. Run tests (pass)
 
-Now the tests pass again. We will continue looping through expectation/test/code and see how things evolve.
+###4.3.2.3 Generate route for edit action
 
-**Expectations:** For a given TestEntity having one field **testField**, we expect the view template to look like:
+Given an entity called **TestEntity** within a bundle **TestBundle**. The generated route for the **edit** action should have:  
+path: **/test/testentity/{id}/edit**  
+controller: **TestBundle:TestEntity:edit**  
+methods: **[GET]**  
+
+#####Cycle 3.1. Add a test
+
+Add the following test to **Tests/Generator/RouteGeneratorTest.php**
+
+````php
+public function testGenerateEditRoute()
+{
+    $bundleMock = $this
+            ->getMockBuilder("Symfony\Component\HttpKernel\Bundle\BundleInterface")
+            ->getMock();
+    $bundleMock
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue('TestBundle'));
+
+    $metadataMock = $this
+            ->getMockBuilder("Doctrine\Common\Persistence\Mapping\ClassMetadata")
+            ->getMock();
+    $metadataMock
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue('TestEntity'));
+
+    $routeGenerator = new \Emag\GeneratorBundle\Generator\RouteGenerator();
+
+    $route = $routeGenerator->getRoute($bundleMock, $metadataMock, 'edit');
+    $this->assertEquals('/test/testentity/{id}/edit', $route->getPath());
+    $this->assertEquals(
+            array('_controller' => 'TestBundle:TestEntity:edit'), $route->getDefaults()
+    );
+    $this->assertEquals(array('GET'), $route->getMethods());
+}
+````
+
+#####Cycle 3.2. Run all tests and see if the new one fails (it does)
+
+#####Cycle 3.3. Write some code
+
+Add a case statement to the switch in `Emag\GeneratorBundle\Generator\RouteGenerator::getRoute`
+
+````
+case 'edit':
+    $route = $this->createEditRoute($bundle, $metadata, $action);
+    break;
+````
+
+Add the following methods:
+
+````php
+/**
+ * @param BundleInterface $bundle
+ * @param ClassMetadata $metadata
+ * @param string $action
+ * @return Route
+ */
+protected function createEditRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    $route = new Route($this->getEditPath($bundle, $metadata, $action));
+    $route->setMethods(array('get'))
+            ->setDefaults(array('_controller' => $this->getControllerAction($bundle, $metadata, $action)));
+    return $route;
+}
+
+/**
+ *
+ * @param BundleInterface $bundle
+ * @param ClassMetadata $metadata
+ * @param string $action
+ * @return string
+ */
+protected function getEditPath(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    return sprintf('/%s/%s/{id}/%s', $this->getRoutePrefix($bundle), strtolower($metadata->getName()), $action);
+}
+````
+
+#####Cycle 3.4. Run tests (pass)
+
+#####Cycle 3.5. Refactor code
+
+In `Emag\GeneratorBundle\Generator\RouteGenerator` `getViewPath` and `getEditPath` are identical. That's a flagrant code duplication.  
+Rename one of them to `getActionPath`, remove the other method, and update the calling code to call `getActionPath`.
+
+Running the tests confirms that our refactoring didn't break anything.
+
+In `Emag\GeneratorBundle\Tests\Generator\RouteGeneratorTest` `testGenerateViewRoute` and `testGenerateEditRoute` share identical code to create a bundle and metadata mocks. We will extract it in separate methods.
+
+````php
+private function createTestBundleMock()
+{
+    $bundleMock = $this
+            ->getMockBuilder("Symfony\Component\HttpKernel\Bundle\BundleInterface")
+            ->getMock();
+    $bundleMock
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue('TestBundle'));
+
+    return $bundleMock;
+}
+
+private function createTestMetadataMock()
+{
+    $metadataMock = $this
+            ->getMockBuilder("Doctrine\Common\Persistence\Mapping\ClassMetadata")
+            ->getMock();
+    $metadataMock
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue('TestEntity'));
+
+    return $metadataMock;
+}
+````
+
+Update the previous creations of mocks to simple method calls.
+````php
+$bundleMock = $this->createTestBundleMock();
+
+$metadataMock = $this->createTestMetadataMock();
+````
+
+###4.3.2.4 Generate route for save action
+
+Given an entity called **TestEntity** within a bundle **TestBundle**. The generated route for the **save** action should have:  
+path: **/test/testentity/{id}/save**  
+controller: **TestBundle:TestEntity:save**  
+methods: **[POST]**
+
+#####Cycle 4.1. Add a test
+
+Add the following test to **Tests/Generator/RouteGeneratorTest.php**
+
+````php
+public function testGenerateSaveRoute()
+{
+    $bundleMock = $this->createTestBundleMock();
+
+    $metadataMock = $this->createTestMetadataMock();
+
+    $routeGenerator = new \Emag\GeneratorBundle\Generator\RouteGenerator();
+
+    $route = $routeGenerator->getRoute($bundleMock, $metadataMock, 'save');
+    $this->assertEquals('/test/testentity/{id}/save', $route->getPath());
+    $this->assertEquals(
+            array('_controller' => 'TestBundle:TestEntity:save'), $route->getDefaults()
+    );
+    $this->assertEquals(array('POST'), $route->getMethods());
+}
+````
+
+#####Cycle 4.2. Run all tests and see if the new one fails (it does)
+
+#####Cycle 4.3. Write some code
+
+Add a case statement for **save** to the switch in `Emag\GeneratorBundle\Generator\RouteGenerator::getRoute`
+
+Add the corresponding method.
+
+````php
+/**
+ * @param BundleInterface $bundle
+ * @param ClassMetadata $metadata
+ * @param string $action
+ * @return Route
+ */
+protected function createSaveRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    $route = new Route($this->getActionPath($bundle, $metadata, $action));
+    $route->setMethods(array('post'))
+            ->setDefaults(array('_controller' => $this->getControllerAction($bundle, $metadata, $action)));
+    return $route;
+}
+````
+#####Cycle 4.4. Run tests (pass)
+
+#####Cycle 4.5. Refactor code
+
+In `Emag\GeneratorBundle\Generator\RouteGenerator`, `createViewRoute` and `createEditRoute` are identical and `createSaveRoute` differs from them only by the route methods. We will extract the common logic in a separate method.
+
+````php
+/**
+ * @param BundleInterface $bundle
+ * @param ClassMetadata $metadata
+ * @param string $action
+ * @return Route
+ */
+protected function createActionRoute(BundleInterface $bundle, ClassMetadata $metadata, $action, $methods = array('get'))
+{
+    $route = new Route($this->getActionPath($bundle, $metadata, $action));
+    $route->setMethods($methods)
+            ->setDefaults(array('_controller' => $this->getControllerAction($bundle, $metadata, $action)));
+    return $route;
+}
+````
+
+The previously duplicated methods will just forward the call to the new method.
+
+````php
+protected function createViewRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    return $this->createActionRoute($bundle, $metadata, $action);
+}
+
+protected function createEditRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    return $this->createActionRoute($bundle, $metadata, $action);
+}
+
+protected function createSaveRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    return $this->createActionRoute($bundle, $metadata, $action, array('post'));
+}
+````
+
+###4.3.2.5 Generate route for save action
+
+Given an entity called **TestEntity** within a bundle **TestBundle**. The generated route for the **new** action should have:  
+path: **/test/testentity/new**  
+controller: **TestBundle:TestEntity:new**  
+methods: **[GET]**
+
+#####Cycle 5.1. Add a test
+
+Add the following test to **Tests/Generator/RouteGeneratorTest.php**
+
+````php
+public function testGenerateNewRoute()
+{
+    $bundleMock = $this->createTestBundleMock();
+
+    $metadataMock = $this->createTestMetadataMock();
+
+    $routeGenerator = new \Emag\GeneratorBundle\Generator\RouteGenerator();
+
+    $route = $routeGenerator->getRoute($bundleMock, $metadataMock, 'new');
+    $this->assertEquals('/test/testentity/{id}/new', $route->getPath());
+    $this->assertEquals(
+            array('_controller' => 'TestBundle:TestEntity:new'), $route->getDefaults()
+    );
+    $this->assertEquals(array('GET'), $route->getMethods());
+}
+````
+#####Cycle 5.2. Run all tests and see if the new one fails (it does)
+
+#####Cycle 5.3. Write some code
+
+Add a case statement for **save** to the switch in `Emag\GeneratorBundle\Generator\RouteGenerator::getRoute`
+
+Add the corresponding method.
+
+````php
+/**
+ * @param BundleInterface $bundle
+ * @param ClassMetadata $metadata
+ * @param string $action
+ * @return Route
+ */
+protected function createNewRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    return $this->createActionRoute($bundle, $metadata, $action);
+}
+````
+#####Cycle 5.4. Run tests (pass)
+
+#####Cycle 5.5. Refactor code
+
+In `Emag\GeneratorBundle\Tests\Generator\RouteGeneratorTest` `testGenerateViewRoute`, `testGenerateEditRoute`, `testGenerateSaveRoute` and `testGenerateNewRoute` are very similar and present the same logic. We will refactor them as following.
+
+````php
+private function generateAndAssertRoute($name, $expectedPath, $expectedDefaults, $expectedMethods)
+{
+    $bundleMock = $this->createTestBundleMock();
+    $metadataMock = $this->createTestMetadataMock();
+
+    $routeGenerator = new \Emag\GeneratorBundle\Generator\RouteGenerator();
+
+    $route = $routeGenerator->getRoute($bundleMock, $metadataMock, $name);
+    $this->assertEquals($expectedPath, $route->getPath());
+    $this->assertEquals($expectedDefaults, $route->getDefaults());
+    $this->assertEquals($expectedMethods, $route->getMethods());
+}
+
+public function testGenerateViewRoute()
+{
+    $this->generateAndAssertRoute(
+            'view', //Expected name
+            '/test/testentity/{id}/view', //Expected path
+            array('_controller' => 'TestBundle:TestEntity:view'), //Expected defaults
+            array('GET') //Expected methods
+    );
+}
+````
+Refactor the other tests as we did with `testGenerateViewRoute`.
+
+###4.3.2.6 Generate route for create action
+
+Given an entity called **TestEntity** within a bundle **TestBundle**. The generated route for the **create** action should have:  
+path: **/test/testentity/create**  
+controller: **TestBundle:TestEntity:create**  
+methods: **[POST]**
+
+#####Cycle 6.1. Add a test
+
+Add the following test to **Tests/Generator/RouteGeneratorTest.php**
+
+````php
+public function testGenerateCreateRoute()
+{
+    $this->generateAndAssertRoute(
+            'create', //Expected name
+            '/test/testentity/{id}/create', //Expected path
+            array('_controller' => 'TestBundle:TestEntity:create'), //Expected defaults
+            array('POST') //Expected methods
+    );
+}
+````
+#####Cycle 6.2. Run all tests and see if the new one fails (it does)
+
+#####Cycle 6.3. Write some code
+
+Add a case statement for **create** to the switch in `Emag\GeneratorBundle\Generator\RouteGenerator::getRoute`
+
+Add the corresponding method.
+
+````php
+/**
+ * @param BundleInterface $bundle
+ * @param ClassMetadata $metadata
+ * @param string $action
+ * @return Route
+ */
+protected function createCreateRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    return $this->createActionRoute($bundle, $metadata, $action, array('post'));
+}
+````
+
+#####Cycle 6.4. Run tests (pass)
+
+#####Cycle 6.5. Refactor code
+
+In `Emag\GeneratorBundle\Tests\Generator\RouteGeneratorTest` all the tests except `testGenerateInvalidAction` just calls `testGenerateInvalidAction` with different arguments. This is a prefect candidate to directly feed `testGenerateInvalidAction` by a data provider.
+
+First, make `generateAndAssertRoute` public and add the following annotation to it
+
+````
+/**
+ * @test
+ * @dataProvider getExpectedRoutes
+ */
+public function generateAndAssertRoute(...
+````
+
+Then add the data provider method.
+
+````php
+public function getExpectedRoutes()
+{
+    return array(
+        array(
+            'view', //name
+            '/test/testentity/{id}/view', //path
+            array('_controller' => 'TestBundle:TestEntity:view'), //defaults
+            array('GET') //methods
+        ),
+        array(
+            'edit', //name
+            '/test/testentity/{id}/edit', //path
+            array('_controller' => 'TestBundle:TestEntity:edit'), //defaults
+            array('GET') //methods
+        ),
+        array(
+            'save', //name
+            '/test/testentity/{id}/save', //path
+            array('_controller' => 'TestBundle:TestEntity:save'), //defaults
+            array('POST') //methods
+        ),
+        array(
+            'new', //name
+            '/test/testentity/{id}/new', //path
+            array('_controller' => 'TestBundle:TestEntity:new'), //defaults
+            array('GET') //methods
+        ),
+        array(
+            'create', //name
+            '/test/testentity/{id}/create', //path
+            array('_controller' => 'TestBundle:TestEntity:create'), //defaults
+            array('POST') //methods
+        )
+    );
+}
+````
+###4.3.2.7 Generate route for delete action
+
+Given an entity called **TestEntity** within a bundle **TestBundle**. The generated route for the **create** action should have:  
+path: **/test/testentity/create**  
+controller: **TestBundle:TestEntity:create**  
+methods: **[POST]**
+
+#####Cycle 7.1. Add a test
+Add the following item to the data provider `getExpectedRoutes`  in **Tests/Generator/RouteGeneratorTest.php**
+
+````
+array(
+    'delete', //name
+    '/test/testentity/{id}/delete', //path
+    array('_controller' => 'TestBundle:TestEntity:delete'), //defaults
+    array('POST') //methods
+)
+````
+
+#####Cycle 7.2. Run all tests and see if the new one fails (it does)
+
+#####Cycle 7.3. Write some code
+
+Add a case statement for **create** to the switch in `Emag\GeneratorBundle\Generator\RouteGenerator::getRoute`
+
+Add the corresponding method.
+
+````php
+/**
+ * @param BundleInterface $bundle
+ * @param ClassMetadata $metadata
+ * @param string $action
+ * @return Route
+ */
+protected function createDeleteRoute(BundleInterface $bundle, ClassMetadata $metadata, $action)
+{
+    return $this->createActionRoute($bundle, $metadata, $action, array('post'));
+}
+````
+#####Cycle 7.4. Run tests (pass)
+
+###4.3.2.8 Generate template for view action
+
+Given an entity called **TestEntity** within a bundle **TestBundle** and having one field named **testField**. The generated twig template for the **view** action should look like:  
+
 ````html
 {% extends 'base.html.twig' %}
 {% block body %}
-    <table>
+    <table class="table-view" id="table-view-TestBundle-TestEntity">
         <tr>
             <th>testField</th>
             <td>{{TestEntity.testField}}</td>
@@ -335,9 +793,8 @@ Now the tests pass again. We will continue looping through expectation/test/code
     </table>
 {% endblock %}
 ````
-The class that will generate the views will use a `Twig_Environment` and render Twig templates of Twig templates.
 
-**Test:**
+#####Cycle 8.1. Add a test
 
 - Create **Tests/Generator/TemplateGeneratorTest.php**
 
@@ -351,20 +808,22 @@ class TemplateGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGenerateViewTemplate()
     {
-        $metadata = new \Doctrine\ORM\Mapping\ClassMetadata('TestEntity');
-        $metadata->mapField(array(
-            'fieldName' => 'testField',
-        ));
-
-        $twig = new \Twig_Environment(new \Twig_Loader_Filesystem(array(__DIR__. '/../../Templates')));
-
+        $twig = new \Twig_Environment(new \Twig_Loader_Filesystem(array(__DIR__ . '/../../Templates')));
         $templateGenerator = new \Emag\GeneratorBundle\Generator\TemplateGenerator($twig);
 
-        $template = $templateGenerator->getTemplate($metadata, 'view');
+        $metadataMock = $this->createTestMetadataMock();
+
+        $metadataMock->expects($this->any())
+                ->method('getFieldNames')
+                ->will($this->returnValue(array('testField')));
+
+        $bundleMock = $this->createTestBundleMock();
+
+        $template = $templateGenerator->getTemplate($bundleMock, $metadataMock, 'view');
         $expectedTemplate = <<<EOF
 {% extends 'base.html.twig' %}
 {% block body %}
-    <table>
+    <table class="table-view" id="table-view-TestBundle-TestEntity">
         <tr>
             <th>testField</th>
             <td>{{TestEntity.testField}}</td>
@@ -375,10 +834,39 @@ EOF;
         $this->assertEquals($expectedTemplate, $template);
     }
 
+    private function createTestBundleMock()
+    {
+        $bundleMock = $this
+                ->getMockBuilder("Symfony\Component\HttpKernel\Bundle\BundleInterface")
+                ->getMock();
+        $bundleMock
+                ->expects($this->any())
+                ->method('getName')
+                ->will($this->returnValue('TestBundle'));
+
+        return $bundleMock;
+    }
+
+    private function createTestMetadataMock()
+    {
+        $metadataMock = $this
+                ->getMockBuilder("Doctrine\Common\Persistence\Mapping\ClassMetadata")
+                ->getMock();
+        $metadataMock
+                ->expects($this->any())
+                ->method('getName')
+                ->will($this->returnValue('TestEntity'));
+
+        return $metadataMock;
+    }
+
 }
 ````
 
-**Code:**
+#####Cycle 8.2. Run all tests and see if the new one fails (it does)
+
+#####Cycle 8.3. Write some code
+
 - Create **Generator/TemplateGenerator.php**
 
 ````php
@@ -386,19 +874,18 @@ EOF;
 
 namespace Emag\GeneratorBundle\Generator;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 class TemplateGenerator
 {
 
     /**
-     *
      * @var \Twig_Environment
      */
     private $twig;
 
     /**
-     *
      * @param \Twig_Environment $twig
      */
     public function __construct(\Twig_Environment $twig)
@@ -407,38 +894,32 @@ class TemplateGenerator
     }
 
     /**
-     *
      * @param ClassMetadata $metadata
      * @param string $action
      * @return string
-     * @throws \InvalidArgumentException
      */
-    public function getTemplate(ClassMetadata $metadata, $action)
+    public function getTemplate(BundleInterface $bundle, ClassMetadata $metadata, $action)
     {
         $template = null;
         switch ($action) {
             case 'view':
-                $template = $this->createViewTemplate($metadata, $action);
+                $template = $this->createViewTemplate($bundle, $metadata, $action);
                 break;
-            default:
-                throw new \InvalidArgumentException(sprintf('invalid action "%s"', $action));
         }
         return $template;
     }
 
     /**
-     *
      * @param ClassMetadata $metadata
      * @param string $action
      * @return string
      */
-    protected function createViewTemplate(ClassMetadata $metadata, $action)
+    protected function createViewTemplate(BundleInterface $bundle, ClassMetadata $metadata, $action)
     {
-        return $this->twig->render($this->getTemplateName($action), array('metadata' => $metadata));
+        return $this->twig->render($this->getTemplateName($action), array('metadata' => $metadata, 'bundle' => $bundle));
     }
 
     /**
-     *
      * @param string $action
      * @return string
      */
@@ -446,6 +927,7 @@ class TemplateGenerator
     {
         return sprintf('views/%s.html.twig.twig', $action);
     }
+
 }
 ````
 
@@ -454,7 +936,7 @@ class TemplateGenerator
 ````html
 {{ "{% extends 'base.html.twig' %}" }}
 {{ "{% block body %}" }}
-    <table>
+    <table class="table-view" id="table-view-{{ bundle.getName()}}-{{metadata.getName()}}">
         {% for fieldName in metadata.getFieldNames() -%}
             <tr>
             <th>{{ fieldName }}</th>
@@ -465,36 +947,22 @@ class TemplateGenerator
 {{ "{% endblock %}" }}
 ````
 
-Running the tests again, we notice that the code coverage has dropped to 88.89%. Indeed, we forgot to test generating a template for an invalid action. Let's edit **Tests/Generator/TemplateGeneratorTest.php** and add the required test.
+#####Cycle 8.4. Run tests (pass)
 
-````php
-<?
-/**
- * @expectedException InvalidArgumentException
- * @expectedExceptionMessage invalid action "invalidAction"
- */
-public function testGenerateInvalidTemplate()
-{
-    $metadata = new \Doctrine\ORM\Mapping\ClassMetadata('TestEntity');
+#####Cycle 8.5. Refactor code
 
-    $twig = new \Twig_Environment(new \Twig_Loader_Filesystem(array(__DIR__. '/../../Templates')));
+We created a significant technical debt with the previous test.
 
-    $templateGenerator = new \Emag\GeneratorBundle\Generator\TemplateGenerator($twig);
+First, `createTestBundleMock` and `createTestMetadataMock` in `Emag\GeneratorBundle\Tests\Generator\TemplateGeneratorTest` duplicates the same methods in `Emag\GeneratorBundle\Tests\Generator\RouteGeneratorTest`. Move those methods to a new abstract class `Emag\GeneratorBundle\Tests\AbstractTestCase` and change their visibility to `protected` so they are visible to sub-classes. Make `Emag\GeneratorBundle\Tests\Generator\TemplateGeneratorTest` and `Emag\GeneratorBundle\Tests\Generator\RouteGeneratorTest` extend from `Emag\GeneratorBundle\Tests\AbstractTestCase`
 
-    $templateGenerator->getTemplate($metadata, 'invalidAction');
-}
-````
+Second, we put the expected template as an inline string. To make the test cleaner, let's move the expected template to a file.
 
-Looks better now, well, almost. Don't omit the 5th step of TDD sequence **refactor code**. We have already created some technical debt that we must clean up before proceeding.
+- Create **Tests/Expected/Template/view.html.twig**
 
-TemplateGeneratorTest::testGenerateViewTemplate() compares the generated template to a hard-coded expected template. We can easily foresee that this file may end up with more twig strings than PHP code.
-We will store the expected template in a file and compare it's content to the generated template.
-
-- Create **Tests/Expected/views/test-view.html.twig**
 ````html
 {% extends 'base.html.twig' %}
 {% block body %}
-    <table>
+    <table class="table-view" id="table-view-TestBundle-TestEntity">
         <tr>
             <th>testField</th>
             <td>{{TestEntity.testField}}</td>
@@ -503,214 +971,99 @@ We will store the expected template in a file and compare it's content to the ge
 {% endblock %}
 ````
 
-Update TemplateGeneratorTest::testGenerateViewTemplate() to assign `file_get_contents('../Expected/views/test-view.html.twig')` to `$expectedTemplate` instead of the hard-coded string. Running the tests again confirms that we didn't broke anything.
-
->**Why refactor testing code anyway?**  
-Maintaining the quality of testing code is equally important to maintaining the quality of production code. Otherwise, the tests will be harder and harder to update and add new ones. Then they will start to fail. You will eventually put some effort and fix them. Then they will fail again, then no one will run them again and they will become useless. Don't forget also that a good test suite is your strongest asset to refactor production code with confidence.  
-Changing production code is tightrope walking, unit tests are your safety net.
-
-Both tests in TemplateGeneratorTest created a TemplateGenerator object. Most probably, many other tests will need the same object. We can declare a class member of that object and initialized before the tests run. Then remove the instantiation of `$twig` and `$templateGenerator` from the tests and use `$this->templateGenerator` instead. The final result looks like
+Update the test in **Tests/Generator/TemplateGeneratorTest.php**
 
 ````php
-<?php
-
-namespace Emag\GeneratorBundle\Tests\Generator;
-
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Emag\GeneratorBundle\Generator\TemplateGenerator;
-
-class TemplateGeneratorTest extends \PHPUnit_Framework_TestCase
+public function testGenerateViewTemplate()
 {
+    $twig = new \Twig_Environment(new \Twig_Loader_Filesystem(array(__DIR__ . '/../../Templates')));
+    $templateGenerator = new \Emag\GeneratorBundle\Generator\TemplateGenerator($twig);
 
-    /**
-     *
-     * @var TemplateGenerator
-     */
-    private $templateGenerator;
+    $metadataMock = $this->createTestMetadataMock();
 
-    protected function setUp()
-    {
-        $twig = new \Twig_Environment(new \Twig_Loader_Filesystem(array(__DIR__ . '/../../Templates')));
-        $this->templateGenerator = new TemplateGenerator($twig);
-    }
+    $metadataMock->expects($this->any())
+            ->method('getFieldNames')
+            ->will($this->returnValue(array('testField')));
 
-    public function testGenerateViewTemplate()
-    {
-        $metadata = new ClassMetadata('TestEntity');
-        $metadata->mapField(array(
-            'fieldName' => 'testField',
-        ));
+    $bundleMock = $this->createTestBundleMock();
 
-        $template = $this->templateGenerator->getTemplate($metadata, 'view');
-        $this->assertEquals(file_get_contents(__DIR__ . '/../Expected/views/test-view.html.twig'), $template);
-    }
+    $template = $templateGenerator->getTemplate($bundleMock, $metadataMock, 'view');
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage invalid action "invalidAction"
-     */
-    public function testGenerateInvalidTemplate()
-    {
-        $metadata = new ClassMetadata('TestEntity');
-        $this->templateGenerator->getTemplate($metadata, 'invalidAction');
-    }
+    $filename = sprintf('%s%2$s..%2$sExpected%2$sTemplate%2$sview.html.twig', __DIR__, DIRECTORY_SEPARATOR);
+    $expectedTemplate = file_get_contents($filename);
+    $this->assertEquals($expectedTemplate, $template);
 }
 ````
 
-Doing well so far. Next, we will expect how a controller action should be.
+###4.3.2.9 Generate template for edit action
 
-- Create **Tests/Expected/controllers/TestViewController.php**
+Given an entity called **TestEntity** within a bundle **TestBundle**. The generated twig template for the **edit** action should look like:  
 
-````php
-<?php
-
-namespace TestBundle\Controller;
-
-class TestEntityController extends \Symfony\Component\HttpKernel\Controller
-{
-
-    public function viewAction($id)
-    {
-        $testEntity = $this->getTestEntity($id);
-        $arguments = array('testEntity' => $testEntity);
-        return $this->render('TestBundle:testEntity:view.html.twig', $arguments);
-    }
-
-    private function getTestEntity($id)
-    {
-        $entityManager = $this->getDoctrine()->getManager();
-        return $entityManager->getRepository('TestBundle:TestEntity')->find($id);
-    }
-}
-````
-
-- Create **Tests/Expected/controllers/TestViewController.php**
-
-````php
-<?php
-
-namespace Emag\GeneratorBundle\Tests\Stubs\TestBundle\TestBundle\Controller;
-
-class TestEntityController extends \Symfony\Component\HttpKernel\Controller
-{
-
-    public function viewAction($id)
-    {
-        $testEntity = $this->getTestEntity($id);
-        $arguments = array('testEntity' => $testEntity);
-        return $this->render('TestBundle:testEntity:view.html.twig', $arguments);
-    }
-
-    private function getTestEntity($id)
-    {
-        $entityManager = $this->getDoctrine()->getManager();
-        return $entityManager->getRepository('TestBundle:TestEntity')->find($id);
-    }
-
-}
-````
-
-- Create **Tests/Generator/ControllerGeneratorTest.php**
-
-````php
-<?php
-
-namespace Emag\GeneratorBundle\Tests\Generator;
-
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Emag\GeneratorBundle\Tests\Stubs\TestBundle\TestBundle;
-
-class ControllerGeneratorTest extends \PHPUnit_Framework_TestCase
-{
-
-    public function testGenerateViewController()
-    {
-        $bundle = new TestBundle();
-        $metadata = new ClassMetadata('TestEntity');
-        $twig = new \Twig_Environment(new \Twig_Loader_Filesystem(array(__DIR__ . '/../../Templates')));
-        $controllerGenerator = new \Emag\GeneratorBundle\Generator\ControllerGenerator($twig);
-
-        $controller = $controllerGenerator->getController($bundle, $metadata, array('view'));
-        $expected = file_get_contents(__DIR__ . '/../Expected/controllers/TestViewController.php');
-        $this->assertEquals($this->cleanCode($expected), $this->cleanCode($controller));
-    }
-
-    private function cleanCode($code)
-    {
-        return preg_replace('/ +/', ' ', str_replace("\n", '', $code));
-    }
-}
-````
-
-- Create **Generator/ControllerGenerator.php**
-````php
-<?php
-
-namespace Emag\GeneratorBundle\Generator;
-
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
-
-class ControllerGenerator
-{
-
-    /**
-     *
-     * @var \Twig_Environment
-     */
-    private $twig;
-
-    /**
-     *
-     * @param \Twig_Environment $twig
-     */
-    public function __construct(\Twig_Environment $twig)
-    {
-        $this->twig = $twig;
-    }
-
-    public function getController(BundleInterface $bundle, ClassMetadata $metadata, array $actions)
-    {
-        return $this->twig->render(
-            'controller/controller.html.twig.twig',
-            array(
-                'actions' => $actions,
-                'bundle' => $bundle,
-                'lowerEntityName' => lcfirst($metadata->getName()),
-                'metadata' => $metadata
-            )
-        );
-    }
-}
-````
-
-- Create **Templates/controller/controller.html.twig.twig**
 ````html
-{% set entityName = metadata.getName() %}
-<?php
+{% extends 'base.html.twig' %}
+{% block body -%}
+    <h1>TestEntity</h1>
+    {{ form(edit_form) }}
+{% endblock %}
+````
 
-namespace {{bundle.getNamespace()}}\Controller;
+#####Cycle 9.1. Add a test
 
-class {{entityName}}Controller extends \Symfony\Component\HttpKernel\Controller
+- Create **Tests/Expected/Template/edit.html.twig**
+````html
+{% extends 'base.html.twig' %}
+{% block body -%}
+    <h1>TestEntity</h1>
+    {{ form(edit_form) }}
+{% endblock %}
+````
+
+Add the following test to `Tests/Generator/TemplateGeneratorTest.php`
+
+````php
+public function testGenerateEditTemplate()
 {
+    $twig = new \Twig_Environment(new \Twig_Loader_Filesystem(array(__DIR__ . '/../../Templates')));
+    $templateGenerator = new \Emag\GeneratorBundle\Generator\TemplateGenerator($twig);
 
-    {% if 'view' in actions -%}
-        {% block viewAction %}
-        public function viewAction($id)
-        {
-            ${{lowerEntityName}} = $this->get{{entityName}}($id);
-            $arguments = array('{{lowerEntityName}}' => ${{lowerEntityName}});
-            return $this->render('TestBundle:{{lowerEntityName}}:view.html.twig', $arguments);
-        }
-        {% endblock %}
-    {% endif %}
+    $metadataMock = $this->createTestMetadataMock();
 
-    {%- block get -%}
-    private function get{{entityName}}($id)
-    {
-        $entityManager = $this->getDoctrine()->getManager();
-        return $entityManager->getRepository('{{bundle.getName()}}:{{entityName}}')->find($id);
-    }  
-    {%- endblock %}
+    $bundleMock = $this->createTestBundleMock();
+
+    $template = $templateGenerator->getTemplate($bundleMock, $metadataMock, 'edit');
+
+    $filename = sprintf('%s%2$s..%2$sExpected%2$sTemplate%2$sedit.html.twig', __DIR__, DIRECTORY_SEPARATOR);
+    $expectedTemplate = file_get_contents($filename);
+    $this->assertEquals($expectedTemplate, $template);
 }
 ````
+#####Cycle 9.2. Run all tests and see if the new one fails (it does)
+#####Cycle 9.3. Write some code
+#####Cycle 9.4. Run tests (pass)
+#####Cycle 9.5. Refactor code
+
+#####Cycle 10.1. Add a test
+#####Cycle 10.2. Run all tests and see if the new one fails (it does)
+#####Cycle 10.3. Write some code
+#####Cycle 10.4. Run tests (pass)
+#####Cycle 10.5. Refactor code
+
+
+#####Cycle 11.1. Add a test
+#####Cycle 11.2. Run all tests and see if the new one fails (it does)
+#####Cycle 11.3. Write some code
+#####Cycle 11.4. Run tests (pass)
+#####Cycle 11.5. Refactor code
+
+
+#####Cycle 12.1. Add a test
+#####Cycle 12.2. Run all tests and see if the new one fails (it does)
+#####Cycle 12.3. Write some code
+#####Cycle 12.4. Run tests (pass)
+#####Cycle 12.5. Refactor code
+
+#####Cycle 13.1. Add a test
+#####Cycle 13.2. Run all tests and see if the new one fails (it does)
+#####Cycle 13.3. Write some code
+#####Cycle 13.4. Run tests (pass)
+#####Cycle 13.5. Refactor code

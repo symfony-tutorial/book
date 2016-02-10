@@ -294,7 +294,7 @@ PHPUnit 3.7.28 by Sebastian Bergmann.
 Configuration read from /home/ubuntu/web/symfony-tutorial/app/phpunit.xml.dist
 .
 
-Time: 2.82 seconds, Memory: 18.25Mb
+Time: 2.92 seconds, Memory: 19.25Mb
 
 OK (1 test, 4 assertions)
 ````
@@ -309,7 +309,7 @@ PHPUnit 3.7.28 by Sebastian Bergmann.
 Configuration read from /home/ubuntu/web/symfony-tutorial/app/phpunit.xml.dist
 .
 
-Time: 8.05 seconds, Memory: 19.25Mb
+Time: 9.05 seconds, Memory: 19.25Mb
 
 OK (1 test, 4 assertions)
 
@@ -553,7 +553,7 @@ PHPUnit 3.7.28 by Sebastian Bergmann.
 Configuration read from /home/ubuntu/web/symfony-tutorial/app/phpunit.xml.dist
 ...
 
-Time: 2.86 seconds, Memory: 18.25Mb
+Time: 2.96 seconds, Memory: 19.25Mb
 
 OK (3 tests, 7 assertions)
 ````
